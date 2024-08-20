@@ -31,6 +31,7 @@ find_package(moveit_common REQUIRED)
 moveit_package()
 
 set(THIS_PACKAGE_INCLUDE_DEPENDS
+  haptic_station_msgs
   control_msgs
   control_toolbox
   geometry_msgs

@@ -50,6 +50,8 @@
 #include <geometry_msgs/msg/pose_array.hpp>
 #include <visualization_msgs/msg/marker_array.hpp>
 #include <visualization_msgs/msg/marker.hpp>
+#include <haptic_station_msgs/msg/robot_distance.hpp>
+#include <haptic_station_msgs/msg/robot_distance_array.hpp>
 
 #include <moveit_servo/servo_parameters.h>
 
@@ -128,6 +130,7 @@ private:
   rclcpp::Publisher<geometry_msgs::msg::PointStamped>::SharedPtr nearest_points_1_pub_;
   rclcpp::Publisher<geometry_msgs::msg::PoseArray>::SharedPtr pose_array_pub_;
   rclcpp::Publisher<visualization_msgs::msg::MarkerArray>::SharedPtr marker_array_pub_;
+  rclcpp::Publisher<haptic_station_msgs::msg::RobotDistanceArray>::SharedPtr robot_distance_array_pub_;
 
   mutable std::mutex joint_state_mutex_;
   sensor_msgs::msg::JointState latest_joint_state_;

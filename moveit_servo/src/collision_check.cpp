@@ -37,6 +37,9 @@
  *      Author    : Brian O'Neil, Andy Zelenak, Blake Anderson
  */
 
+#include <iostream>
+#include <chrono>
+
 #include <std_msgs/msg/float64.hpp>
 #include <geometry_msgs/msg/point_stamped.hpp>
 #include <geometry_msgs/msg/pose_array.hpp>
@@ -109,6 +112,8 @@ CollisionCheck::CollisionCheck(const rclcpp::Node::SharedPtr& node, const ServoP
       node_->create_publisher<geometry_msgs::msg::PointStamped>("nearest_point_1", rclcpp::SystemDefaultsQoS());// Made by pipe, testing purposes
   marker_array_pub_ =
       node_->create_publisher<visualization_msgs::msg::MarkerArray>("marker_array", rclcpp::SystemDefaultsQoS());// Made by pipe, testing purposes
+  robot_distance_array_pub_ =
+      node_->create_publisher<haptic_station_msgs::msg::RobotDistanceArray>("robot_distance_array", rclcpp::SystemDefaultsQoS());// Made by pipe, testing purposes
   current_state_ = planning_scene_monitor_->getStateMonitor()->getCurrentState();
 }
 
@@ -135,11 +140,18 @@ void CollisionCheck::run()
   auto locked_scene = planning_scene_monitor::LockedPlanningSceneRO(planning_scene_monitor_);
   locked_scene->getCollisionEnv()->checkRobotCollision(collision_request_, collision_result_, *current_state_,
                                                        locked_scene->getAllowedCollisionMatrix());
+  // Calculate distances                                                 
+  auto start = std::chrono::high_resolution_clock::now();
   locked_scene->getCollisionEnv()->distanceRobot(distance_request_, distance_result_, *current_state_);
+  auto end = std::chrono::high_resolution_clock::now();
+  std::chrono::duration<double> duration = end - start;
+  RCLCPP_INFO(LOGGER, "Distances calculated in '%f' seconds", duration.count());
 
   scene_collision_distance_ = collision_result_.distance;
   collision_detected_ |= collision_result_.collision;
   collision_result_.print();
+
+  haptic_station_msgs::msg::RobotDistanceArray robot_distance_array;
 
   int index = 0;
   for (auto it = distance_result_.distances.begin(); it != distance_result_.distances.end(); ++it, ++index) {
@@ -149,8 +161,8 @@ void CollisionCheck::run()
         std::__cxx11::basic_string<char> link_first = pair_string.first;
         std::__cxx11::basic_string<char> link_second = pair_string.second;
 
-        RCLCPP_INFO(LOGGER, "Pair: '%s' , '%s'", link_first.c_str(), link_second.c_str());
-        RCLCPP_INFO(LOGGER, "Vector Size: '%li'", mvect.size());
+        // RCLCPP_INFO(LOGGER, "Pair: '%s' , '%s'", link_first.c_str(), link_second.c_str());
+        // RCLCPP_INFO(LOGGER, "Vector Size: '%li'", mvect.size());
 
         for(long unsigned int i = 0; i < mvect.size(); i++)
         {
@@ -160,36 +172,6 @@ void CollisionCheck::run()
           normal_ = dist_res.normal;
           
           marker.ns = link_second.c_str();
-
-          // marker.id = 3*i;
-          // marker.type = visualization_msgs::msg::Marker::SPHERE;
-          // marker.pose.position.x = nearest_points_0_.x();
-          // marker.pose.position.y = nearest_points_0_.y();
-          // marker.pose.position.z = nearest_points_0_.z();
-          // marker.color.a = 1.0;
-          // marker.color.r = 0.0;
-          // marker.color.g = 1.0;
-          // marker.color.b = 0.0;
-          // marker.scale.x = 0.1;
-          // marker.scale.y = 0.1;
-          // marker.scale.z = 0.1;
-
-          // marker_array.markers.push_back(marker);
-
-          // marker.id = 3*i+1;
-          // marker.type = visualization_msgs::msg::Marker::SPHERE;
-          // marker.pose.position.x = nearest_points_1_.x();
-          // marker.pose.position.y = nearest_points_1_.y();
-          // marker.pose.position.z = nearest_points_1_.z();
-          // marker.color.a = 1.0;
-          // marker.color.r = 0.0;
-          // marker.color.g = 0.0;
-          // marker.color.b = 1.0;
-          // marker.scale.x = 0.1;
-          // marker.scale.y = 0.1;
-          // marker.scale.z = 0.1;
-
-          // marker_array.markers.push_back(marker);
 
           marker.id = i;
           marker.type = visualization_msgs::msg::Marker::ARROW;
@@ -220,10 +202,20 @@ void CollisionCheck::run()
 
           marker_array.markers.push_back(marker);
           marker.points.clear();
+
+          haptic_station_msgs::msg::RobotDistance robot_distance;
+          robot_distance.link_first = link_first.c_str();
+          robot_distance.link_second = link_second.c_str();
+          robot_distance.distance = dist_res.distance;
+          robot_distance.point_first = start_point;
+          robot_distance.point_second = end_point;
+          robot_distance_array.robot_distance_array.push_back(robot_distance);
         }
     }
   marker_array_pub_->publish(marker_array);
   marker_array.markers.clear();
+
+  robot_distance_array_pub_->publish(robot_distance_array);
 
   //// Made by pipe, testing purposes ////
   // auto np0 = std::make_unique<geometry_msgs::msg::PointStamped>();
