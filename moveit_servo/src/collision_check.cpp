@@ -207,9 +207,15 @@ void CollisionCheck::run()
           robot_distance.link_first = link_first.c_str();
           robot_distance.link_second = link_second.c_str();
           robot_distance.distance = dist_res.distance;
-          robot_distance.point_first = start_point;
-          robot_distance.point_second = end_point;
-          robot_distance_array.robot_distance_array.push_back(robot_distance);
+          geometry_msgs::msg::PointStamped point_first;
+          point_first.header.frame_id = "world";
+          point_first.point = start_point;
+          robot_distance.point_first = point_first;
+          geometry_msgs::msg::PointStamped point_second;
+          point_second.header.frame_id = "world";
+          point_second.point = end_point;
+          robot_distance.point_second = point_second;
+          robot_distance_array.distances.push_back(robot_distance);
         }
     }
   marker_array_pub_->publish(marker_array);
