@@ -44,10 +44,12 @@
 
 #include <moveit/robot_model_loader/robot_model_loader.h>
 #include <moveit/planning_scene_monitor/planning_scene_monitor.h>
+#include <moveit/planning_scene_interface/planning_scene_interface.h>
 #include <sensor_msgs/msg/joint_state.hpp>
 #include <std_msgs/msg/float64.hpp>
 #include <geometry_msgs/msg/point_stamped.hpp>
 #include <geometry_msgs/msg/pose_array.hpp>
+#include <geometry_msgs/msg/pose.hpp>
 #include <visualization_msgs/msg/marker_array.hpp>
 #include <visualization_msgs/msg/marker.hpp>
 #include <haptic_station_msgs/msg/robot_distance.hpp>
@@ -56,6 +58,10 @@
 #include <moveit_servo/servo_parameters.h>
 
 #include <Eigen/Core>
+
+#include <moveit_msgs/msg/collision_object.hpp>
+#include <moveit_msgs/msg/attached_collision_object.hpp>
+#include <shape_msgs/msg/solid_primitive.hpp>
 
 namespace moveit_servo
 {
@@ -96,6 +102,7 @@ private:
 
   // Pointer to the collision environment
   planning_scene_monitor::PlanningSceneMonitorPtr planning_scene_monitor_;
+  moveit::planning_interface::PlanningSceneInterface planning_scene_interface_;
 
   // Robot state and collision matrix from planning scene
   std::shared_ptr<moveit::core::RobotState> current_state_;

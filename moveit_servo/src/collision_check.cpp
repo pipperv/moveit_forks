@@ -70,6 +70,32 @@ CollisionCheck::CollisionCheck(const rclcpp::Node::SharedPtr& node, const ServoP
   collision_request_.distance = true;  // enable distance-based collision checking
   collision_request_.contacts = true;  // Record the names of collision pairs
 
+  moveit_msgs::msg::CollisionObject collision_object;
+  collision_object.header.frame_id = "base_link";
+  collision_object.id = "base_cylinder";
+  collision_object.operation = moveit_msgs::msg::CollisionObject::ADD;
+  collision_object.primitives.resize(1);
+  collision_object.primitives[0].type = shape_msgs::msg::SolidPrimitive::BOX;
+  collision_object.primitives[0].dimensions.resize(3);
+  collision_object.primitives[0].dimensions[0] = 0.4;
+  collision_object.primitives[0].dimensions[1] = 0.6;
+  collision_object.primitives[0].dimensions[2] = 0.2;
+  collision_object.primitive_poses.resize(1);
+  collision_object.primitive_poses[0].position.x = 0.0;
+  collision_object.primitive_poses[0].position.y = 0.0;
+  collision_object.primitive_poses[0].position.z = -0.1;
+  collision_object.primitive_poses[0].orientation.x = 0.0;
+  collision_object.primitive_poses[0].orientation.y = 0.0;
+  collision_object.primitive_poses[0].orientation.z = 0.0;
+  collision_object.primitive_poses[0].orientation.w = 1.0;
+  // planning_scene_interface_.applyCollisionObject(collision_object);
+
+  moveit_msgs::msg::AttachedCollisionObject attached_collision_object;
+  attached_collision_object.link_name = "base_link";
+  attached_collision_object.object = collision_object;
+  attached_collision_object.object.operation = moveit_msgs::msg::CollisionObject::ADD;
+  planning_scene_interface_.applyAttachedCollisionObject(attached_collision_object);
+
   auto locked_scene = planning_scene_monitor::LockedPlanningSceneRO(planning_scene_monitor_);
 
   distance_request_.group_name = parameters_->move_group_name;
@@ -119,6 +145,8 @@ CollisionCheck::CollisionCheck(const rclcpp::Node::SharedPtr& node, const ServoP
 
 void CollisionCheck::start()
 {
+  
+
   timer_ = node_->create_wall_timer(std::chrono::duration<double>(period_), [this]() { return run(); });
 }
 

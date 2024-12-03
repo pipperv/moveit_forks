@@ -35,9 +35,11 @@ set(THIS_PACKAGE_INCLUDE_DEPENDS
   control_msgs
   control_toolbox
   geometry_msgs
+  shape_msgs
   moveit_core
   moveit_msgs
   moveit_ros_planning
+  moveit_ros_planning_interface
   pluginlib
   rclcpp
   rclcpp_components
