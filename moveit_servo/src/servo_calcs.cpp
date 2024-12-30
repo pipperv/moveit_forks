@@ -1190,9 +1190,12 @@ void ServoCalcs::changeDriftDimensions(const std::shared_ptr<moveit_msgs::srv::C
   drift_dimensions_[0] = req->drift_x_translation;
   drift_dimensions_[1] = req->drift_y_translation;
   drift_dimensions_[2] = req->drift_z_translation;
-  drift_dimensions_[3] = req->drift_x_rotation;
+  drift_dimensions_[3] = true;
+  // drift_dimensions_[4] = true;
+  drift_dimensions_[5] = true;
+  // drift_dimensions_[3] = req->drift_x_rotation;
   drift_dimensions_[4] = req->drift_y_rotation;
-  drift_dimensions_[5] = req->drift_z_rotation;
+  // drift_dimensions_[5] = req->drift_z_rotation;
 
   res->success = true;
 }

@@ -55,40 +55,68 @@
 #include <thread>
 
 // We'll just set up parameters here
-const std::string JOY_TOPIC = "/joy";
+const std::string JOY_TOPIC = "/JOYSTICK/joy";
 const std::string TWIST_TOPIC = "/servo_node/delta_twist_cmds";
 const std::string JOINT_TOPIC = "/servo_node/delta_joint_cmds";
 const std::string EEF_FRAME_ID = "tool0";
 const std::string BASE_FRAME_ID = "base_link";
 
 // Enums for button names -> axis/button array index
-// For Nintendo Switch controller
+// For Brunner
 enum Axis
 {
   LEFT_STICK_X = 0,
   LEFT_STICK_Y = 1,
   RIGHT_STICK_X = 2,
-  RIGHT_STICK_Y = 3,
+  RIGHT_STICK_Y = 5,
   D_PAD_X = 4,
-  D_PAD_Y = 5
+  D_PAD_Y = 3
 };
 enum Button
 {
-  B = 0,
-  A = 1,
-  X = 2,
+  B = 1,
+  A = 0,
+  X = 5,
   Y = 3,
   SCREENSHOT = 4,
-  LEFT_BUMPER = 5,
-  RIGHT_BUMPER = 6,
-  LEFT_TRIGGER = 7,
-  RIGHT_TRIGGER = 8,
+  LEFT_BUMPER = 3,
+  RIGHT_BUMPER = 8,
+  LEFT_TRIGGER = 2,
+  RIGHT_TRIGGER = 7,
   MINUS = 9,
   PLUS = 10,
   HOME = 11,
   LEFT_STICK_CLICK = 12,
   RIGHT_STICK_CLICK = 13
 };
+
+// For Nintendo Switch controller
+// enum Axis
+// {
+//   LEFT_STICK_X = 0,
+//   LEFT_STICK_Y = 1,
+//   RIGHT_STICK_X = 2,
+//   RIGHT_STICK_Y = 3,
+//   D_PAD_X = 4,
+//   D_PAD_Y = 5
+// };
+// enum Button
+// {
+//   B = 0,
+//   A = 1,
+//   X = 2,
+//   Y = 3,
+//   SCREENSHOT = 4,
+//   LEFT_BUMPER = 5,
+//   RIGHT_BUMPER = 6,
+//   LEFT_TRIGGER = 7,
+//   RIGHT_TRIGGER = 8,
+//   MINUS = 9,
+//   PLUS = 10,
+//   HOME = 11,
+//   LEFT_STICK_CLICK = 12,
+//   RIGHT_STICK_CLICK = 13
+// };
 
 // For XBOX 360 controller
 // enum Axis
@@ -131,6 +159,15 @@ std::map<Button, double> BUTTON_DEFAULTS;
  * @param joint A JointJog message to update in prep for publishing
  * @return return true if you want to publish a Twist, false if you want to publish a JointJog
  */
+
+double applyDeadzone(double value, double deadzone)
+{
+  if (std::abs(value) < deadzone)
+    return 0.0;
+  else
+    return value;
+}
+
 bool convertJoyToCmd(const std::vector<float>& axes, const std::vector<int>& buttons,
                      std::unique_ptr<geometry_msgs::msg::TwistStamped>& twist,
                      std::unique_ptr<control_msgs::msg::JointJog>& joint)
@@ -154,18 +191,18 @@ bool convertJoyToCmd(const std::vector<float>& axes, const std::vector<int>& but
   // }
 
   // The bread and butter: map buttons to twist commands
-  twist->twist.linear.x = axes[LEFT_STICK_Y];
-  twist->twist.linear.y = axes[LEFT_STICK_X];
-  twist->twist.linear.z = axes[D_PAD_Y];
+  twist->twist.linear.x = applyDeadzone(axes[LEFT_STICK_Y], 0.2);
+  twist->twist.linear.y = applyDeadzone(axes[LEFT_STICK_X], 0.2);
+  twist->twist.linear.z = applyDeadzone(-axes[D_PAD_Y], 0.2);
 
 
   // double lin_x_right = -0.5 * (axes[RIGHT_TRIGGER] - AXIS_DEFAULTS.at(RIGHT_TRIGGER));
   // double lin_x_left = 0.5 * (axes[LEFT_TRIGGER] - AXIS_DEFAULTS.at(LEFT_TRIGGER));
   // twist->twist.linear.x = lin_x_right + lin_x_left;
 
-  twist->twist.angular.x = -axes[RIGHT_STICK_X];
-  twist->twist.angular.y = axes[RIGHT_STICK_Y];
-  twist->twist.angular.z = -axes[D_PAD_X];
+  twist->twist.angular.x = applyDeadzone(-axes[RIGHT_STICK_X], 0.2);
+  twist->twist.angular.y = applyDeadzone(axes[RIGHT_STICK_Y], 0.2);
+  twist->twist.angular.z = applyDeadzone(-axes[D_PAD_X], 0.2);
 
   // double roll_positive = buttons[RIGHT_BUMPER];
   // double roll_negative = -1 * (buttons[LEFT_BUMPER]);
@@ -173,6 +210,8 @@ bool convertJoyToCmd(const std::vector<float>& axes, const std::vector<int>& but
 
   return true;
 }
+
+
 
 /** \brief // This should update the frame_to_publish_ as needed for changing command frame via controller
  * @param frame_name Set the command frame to this
