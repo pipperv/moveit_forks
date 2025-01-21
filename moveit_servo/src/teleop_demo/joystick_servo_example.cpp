@@ -68,26 +68,24 @@ enum Axis
   LEFT_STICK_X = 0,
   LEFT_STICK_Y = 1,
   RIGHT_STICK_X = 2,
-  RIGHT_STICK_Y = 5,
-  D_PAD_X = 4,
-  D_PAD_Y = 3
+  RIGHT_STICK_Y = 3,
+  RIGHT_D_PAD_X = 4,
+  RIGHT_D_PAD_Y = 5,
+  LEFT_D_PAD_X = 6,
+  LEFT_D_PAD_Y = 7
 };
 enum Button
 {
-  B = 1,
-  A = 0,
-  X = 5,
-  Y = 3,
-  SCREENSHOT = 4,
-  LEFT_BUMPER = 3,
-  RIGHT_BUMPER = 8,
+  LEFT_RED = 0,
+  LEFT_GREEN = 1,
   LEFT_TRIGGER = 2,
+  LEFT_BLACK = 3,
+  LEFT_BLUE = 4,
+  RIGHT_RED = 5,
+  RIGHT_GREEN = 6,
   RIGHT_TRIGGER = 7,
-  MINUS = 9,
-  PLUS = 10,
-  HOME = 11,
-  LEFT_STICK_CLICK = 12,
-  RIGHT_STICK_CLICK = 13
+  RIGHT_BLACK = 8,
+  RIGHT_BLUE = 9
 };
 
 // For Nintendo Switch controller
@@ -190,19 +188,21 @@ bool convertJoyToCmd(const std::vector<float>& axes, const std::vector<int>& but
   //   return false;
   // }
 
+  int accept_command = buttons[RIGHT_TRIGGER] * buttons[LEFT_TRIGGER];
+
   // The bread and butter: map buttons to twist commands
-  twist->twist.linear.x = applyDeadzone(axes[LEFT_STICK_Y], 0.2);
-  twist->twist.linear.y = applyDeadzone(axes[LEFT_STICK_X], 0.2);
-  twist->twist.linear.z = applyDeadzone(-axes[D_PAD_Y], 0.2);
+  twist->twist.linear.x = applyDeadzone(accept_command*axes[LEFT_STICK_Y], 0.2);
+  twist->twist.linear.y = applyDeadzone(accept_command*axes[LEFT_STICK_X], 0.2);
+  twist->twist.linear.z = applyDeadzone(-accept_command*axes[RIGHT_STICK_Y], 0.2);
 
 
   // double lin_x_right = -0.5 * (axes[RIGHT_TRIGGER] - AXIS_DEFAULTS.at(RIGHT_TRIGGER));
   // double lin_x_left = 0.5 * (axes[LEFT_TRIGGER] - AXIS_DEFAULTS.at(LEFT_TRIGGER));
   // twist->twist.linear.x = lin_x_right + lin_x_left;
 
-  twist->twist.angular.x = applyDeadzone(-axes[RIGHT_STICK_X], 0.2);
-  twist->twist.angular.y = applyDeadzone(axes[RIGHT_STICK_Y], 0.2);
-  twist->twist.angular.z = applyDeadzone(-axes[D_PAD_X], 0.2);
+  twist->twist.angular.x = applyDeadzone(-accept_command*axes[RIGHT_D_PAD_X], 0.2);
+  twist->twist.angular.y = applyDeadzone(accept_command*axes[RIGHT_D_PAD_Y], 0.2);
+  twist->twist.angular.z = applyDeadzone(-accept_command*axes[LEFT_D_PAD_X], 0.2);
 
   // double roll_positive = buttons[RIGHT_BUMPER];
   // double roll_negative = -1 * (buttons[LEFT_BUMPER]);
@@ -219,9 +219,9 @@ bool convertJoyToCmd(const std::vector<float>& axes, const std::vector<int>& but
  */
 void updateCmdFrame(std::string& frame_name, const std::vector<int>& buttons)
 {
-  if (buttons[MINUS] && frame_name == EEF_FRAME_ID)
+  if (buttons[RIGHT_BLUE] && frame_name == EEF_FRAME_ID)
     frame_name = BASE_FRAME_ID;
-  else if (buttons[PLUS] && frame_name == BASE_FRAME_ID)
+  else if (buttons[RIGHT_BLUE] && frame_name == BASE_FRAME_ID)
     frame_name = EEF_FRAME_ID;
 }
 
