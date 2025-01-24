@@ -58,7 +58,7 @@
 const std::string JOY_TOPIC = "/JOYSTICK/joy";
 const std::string TWIST_TOPIC = "/servo_node/delta_twist_cmds";
 const std::string JOINT_TOPIC = "/servo_node/delta_joint_cmds";
-const std::string EEF_FRAME_ID = "tool0";
+const std::string EEF_FRAME_ID = "base_link";
 const std::string BASE_FRAME_ID = "base_link";
 
 // Enums for button names -> axis/button array index
@@ -188,7 +188,8 @@ bool convertJoyToCmd(const std::vector<float>& axes, const std::vector<int>& but
   //   return false;
   // }
 
-  int accept_command = buttons[RIGHT_TRIGGER] * buttons[LEFT_TRIGGER];
+  // int accept_command = buttons[RIGHT_TRIGGER] * buttons[LEFT_TRIGGER];
+  int accept_command = 1;
 
   // The bread and butter: map buttons to twist commands
   twist->twist.linear.x = applyDeadzone(accept_command*axes[LEFT_STICK_Y], 0.2);
