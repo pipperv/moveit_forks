@@ -58,8 +58,8 @@
 const std::string JOY_TOPIC = "/JOYSTICK/joy";
 const std::string TWIST_TOPIC = "/servo_node/delta_twist_cmds";
 const std::string JOINT_TOPIC = "/servo_node/delta_joint_cmds";
-const std::string EEF_FRAME_ID = "base_link";
-const std::string BASE_FRAME_ID = "base_link";
+const std::string EEF_FRAME_ID = "world";
+const std::string BASE_FRAME_ID = "world";
 
 // Enums for button names -> axis/button array index
 // For Brunner
