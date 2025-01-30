@@ -71,7 +71,7 @@ CollisionCheck::CollisionCheck(const rclcpp::Node::SharedPtr& node, const ServoP
   collision_request_.contacts = true;  // Record the names of collision pairs
 
   moveit_msgs::msg::CollisionObject collision_object;
-  collision_object.header.frame_id = "base_link";
+  collision_object.header.frame_id = "world";
   collision_object.id = "base_cylinder";
   collision_object.operation = moveit_msgs::msg::CollisionObject::ADD;
   collision_object.primitives.resize(1);
@@ -91,10 +91,10 @@ CollisionCheck::CollisionCheck(const rclcpp::Node::SharedPtr& node, const ServoP
   // planning_scene_interface_.applyCollisionObject(collision_object);
 
   moveit_msgs::msg::AttachedCollisionObject attached_collision_object;
-  attached_collision_object.link_name = "base_link";
+  attached_collision_object.link_name = "world";
   attached_collision_object.object = collision_object;
   attached_collision_object.object.operation = moveit_msgs::msg::CollisionObject::ADD;
-  planning_scene_interface_.applyAttachedCollisionObject(attached_collision_object);
+  // planning_scene_interface_.applyAttachedCollisionObject(attached_collision_object);
 
   auto locked_scene = planning_scene_monitor::LockedPlanningSceneRO(planning_scene_monitor_);
 
